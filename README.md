@@ -1,0 +1,1 @@
+*store dot emacs file here.*
