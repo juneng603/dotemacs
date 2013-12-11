@@ -1,1 +1,1 @@
-*store dot emacs file here.*
+# *store dot emacs file here.*
