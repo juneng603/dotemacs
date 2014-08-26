@@ -1,6 +1,22 @@
 ;;;
+;;; PACKAGE SYSTEM (melpa)
+
+(when (>= emacs-major-version 24)
+  (require 'package)
+  (package-initialize))
+(dolist (sources '(("melpa" . "http://melpa.milkbox.net/packages/")
+                   ("marmalade" . "http://marmalade-repo.org/packages/")
+                   ("elpa" . "http://tromey.com/elpa/")))
+  (add-to-list 'package-archives sources t))
+
+;;;
 ;;; add a default load-path
-(add-to-list 'load-path "~/.emacs.d/lisp/")
+(add-to-list 'load-path "~/.emacs.d/site-lisp/")
+
+;;;
+;;; LOAD PATH
+
+(setenv "PATH" "~/bin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/opt/X11/bin")
 
 ;;;
 ;;; NO SPLASH
@@ -8,20 +24,96 @@
 (setq inhibit-startup-message t)
 
 ;;;
+;;; VERTICAL SPLITTING
+
+(setq split-height-threshold 999)
+;; (setq split-width-threshold 0)
+
+;;;
+;;; BUFFER MOVE
+
+(require 'buffer-move)
+(global-set-key (kbd "<C-S-up>")     'buf-move-up)
+(global-set-key (kbd "<C-S-down>")   'buf-move-down)
+(global-set-key (kbd "<C-S-left>")   'buf-move-left)
+(global-set-key (kbd "<C-S-right>")  'buf-move-right)
+
+;;;
 ;;; NO BACKUP
 (setq make-backup-files nil)
+
+;;;
+;;; HIDE HIDDEN FILES
+
+(require 'dired-x)
+(setq dired-omit-files "^\\...+$")
+(add-hook 'dired-mode-hook (lambda () (dired-omit-mode 1)))
+
+;;;
+;;; MAGIT
+(setq magit-diff-options '("-b"))
+
+;;;
+;;; GNU GLOBAL
+
+(setq load-path (cons "/usr/local/bin/gtags" load-path))
+(autoload 'gtags-mode "gtags" "" t)
+
+(add-hook 'gtags-mode-hook
+          (lambda ()
+            (local-set-key (kbd "M-*") 'gtags-pop-stack)
+            (local-set-key (kbd "M-.") 'gtags-find-tag)
+            (local-set-key (kbd "M-p") 'gtags-find-pattern)
+            (local-set-key (kbd "M-s") 'gtags-find-symbol)
+            (local-set-key (kbd "M-,") 'gtags-find-rtag)))
+
+
+;;;
+;;; GDB-DEBUG
+
+(global-set-key [f9] 'gud-break)
+(global-set-key [f10] 'gud-next)
+(global-set-key [f11] 'gud-step)
+(global-set-key [(shift f11)] 'gud-finish)
+(global-set-key [(shift f10)] '(lambda ()
+                                 (interactive)
+                                 (call-interactively 'gud-tbreak)
+                                 (call-interactively 'gud-cont)))
 
 ;;;
 ;;; FRAME SIZE
 (setq initial-frame-alist '((width . 130) (height . 80)))
 ;;;(setq default-frame-alist '((width . 50) (height . 20)))
 
+
+;;;
+;;; GIT
+(require 'git)
+
+;;;
+;;; C++ MEMBER FUNCTION
+(require 'member-functions)
+
 ;;;
 ;;; TAB
 
-;;(setq default-tab-width 4)
+(setq default-tab-width 4)
 (setq tab-stop-list '(4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100))
 (setq-default indent-tabs-mode nil)
+
+;;;
+;;; IGNORE NAMESPACE INDENTATION
+;; Basic indentation
+(setq c-basic-offset 4)
+
+(defun my-c-setup ()
+  (c-set-offset 'innamespace 0))
+(add-hook 'c++-mode-hook 'my-c-setup)
+;; (defconst my-cc-style
+;;   '("cc-mode"
+;;     (c-offsets-alist . ((innamespace . [0])))))
+
+;; (c-add-style "my-cc-mode" my-cc-style)
 
 ;;;
 ;;; MOVE FRAME
@@ -44,6 +136,10 @@
 ;;; LINE WRAP
 
 (setq truncate-partial-width-windows nil)
+
+;;; AUTO SAVE
+(setq auto-save-interval 5
+      auto-save-timeout 5)
 
 ;;;
 ;;; MAC
@@ -83,24 +179,9 @@
   )
 
 ;;;
-;;; GNU GLOBAL
-
-;;(autoload 'gtags-mode "gtags" "" t)
-(add-hook 'c-mode-common-hook
-          (lambda ()
-            (gtags-mode 1)))
-(add-hook 'gtags-mode-hook
-          (lambda ()
-            (local-set-key (kbd "M-.") 'gtags-find-tag)
-            (local-set-key (kbd "M-,") 'gtags-find-rtag)))
-
-(setq load-path (cons "/usr/local/bin/gtags" load-path))
-(autoload 'gtags-mode "gtags" "" t)
-
-;;;
 ;;; SCALA
-(add-to-list 'load-path "/opt/scala-mode2/")
-(require 'scala-mode)
+;;;(add-to-list 'load-path "/opt/scala-mode2/")
+;;;(require 'scala-mode)
 
 ;;;
 ;;; JSP
@@ -207,8 +288,11 @@
     (setq auto-mode-alist (append '(("\.sql$" . sql-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.sh$" . shell-script-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.jsp$" . java-mode)) auto-mode-alist))
-    (setq auto-mode-alist (append '(("\.java$" . android-mode)) auto-mode-alist))
+    (setq auto-mode-alist (append '(("\.java$" . java-mode)) auto-mode-alist))
+    (setq auto-mode-alist (append '(("\.py$" . python-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.go$" . go-mode)) auto-mode-alist))
+    (setq auto-mode-alist (append '(("\.js$" . javascript-mode)) auto-mode-alist))
+    (setq auto-mode-alist (append '(("\.sh$" . sh-mode)) auto-mode-alist))
     ))
  )
 
@@ -251,7 +335,8 @@
 ;;;
 ;;; GREP
 
-(setq-default grep-command "grep -nrHI -e ")
+;;(setq-default grep-command "grep -nrHI -e ")
+(setq grep-command "grep -nrHI --exclude='.svn' -e ")
 (setq grep-highlight-matches t)
 
 ;;;
@@ -281,3 +366,6 @@
 (setq tramp-default-method "ssh")
 ;;(add-to-list tramp-default-proxy-alist ("srch14" nil "/ssh:junyoung@spb-ws2-srch14"))
 ;; /sudo:srch14:path
+
+;;;
+;;; uniq-lines()
