@@ -24,6 +24,10 @@
 (setq inhibit-startup-message t)
 
 ;;;
+;;; disable ctrl z to hide an emacs app in mac os x
+(global-unset-key (kbd "C-z"))
+
+;;;
 ;;; VERTICAL SPLITTING
 
 (setq split-height-threshold 999)
@@ -177,8 +181,8 @@
 (setq truncate-partial-width-windows nil)
 
 ;;; AUTO SAVE
-(setq auto-save-interval 5
-      auto-save-timeout 5)
+;; (setq auto-save-interval 5
+;;       auto-save-timeout 5)
 
 ;;;
 ;;; MAC
