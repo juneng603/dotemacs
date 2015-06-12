@@ -1,22 +1,28 @@
 ;;;
 ;;; PACKAGE SYSTEM (melpa)
 
-(when (>= emacs-major-version 24)
-  (require 'package)
-  (package-initialize))
-(dolist (sources '(("melpa" . "http://melpa.milkbox.net/packages/")
-                   ("marmalade" . "http://marmalade-repo.org/packages/")
-                   ("elpa" . "http://tromey.com/elpa/")))
-  (add-to-list 'package-archives sources t))
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/") t)
+(when (< emacs-major-version 24)
+  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
+(package-initialize)
 
 ;;;
 ;;; add a default load-path
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 
+(when (memq window-system '(mac ns))
+  (exec-path-from-shell-initialize))
+
+;; (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
+;; (setq exec-path (append exec-path '("/usr/local/bin")))
+
+
 ;;;
 ;;; LOAD PATH
 
-(setenv "PATH" "~/bin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/opt/X11/bin")
+;;(setenv "PATH" "~/bin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/opt/X11/bin")
 
 ;;;
 ;;; NO SPLASH
@@ -24,14 +30,31 @@
 (setq inhibit-startup-message t)
 
 ;;;
+;;; HELM
+
+(helm-mode t)
+
+;;;
+;;; MARK REGION BACKGROUND COLOR
+
+(set-face-attribute 'region nil :background "#666")
+
+;;;
+;;; HELM PROJECTILE
+
+;; (projectile-global-mode)
+;; (setq projectile-completion-system 'helm)
+;; (helm-projectile-on)
+
+;;;
 ;;; disable ctrl z to hide an emacs app in mac os x
+
 (global-unset-key (kbd "C-z"))
 
 ;;;
 ;;; VERTICAL SPLITTING
 
 (setq split-height-threshold 999)
-;; (setq split-width-threshold 0)
 
 ;;;
 ;;; BUFFER MOVE
@@ -44,7 +67,13 @@
 
 ;;;
 ;;; NO BACKUP
-(setq make-backup-files nil)
+
+(setq backup-inhibited t)
+
+;;;
+;;; NO AUTOSAVE
+
+(setq auto-save-default nil)
 
 ;;;
 ;;; HIDE HIDDEN FILES
@@ -56,6 +85,7 @@
 
 ;;;
 ;;; REGION TEXT MOVE
+
 (defun move-text-internal (arg)
    (cond
     ((and mark-active transient-mark-mode)
@@ -94,22 +124,34 @@
 
 ;;;
 ;;; MAGIT
+
 (setq magit-diff-options '("-b"))
+(setq magit-auto-revert-mode nil)
+(setq magit-last-seen-setup-instructions "1.4.0")
 
 ;;;
-;;; GNU GLOBAL
+;;; GNU GLOBAL WITH HELM
 
-(setq load-path (cons "/usr/local/bin/gtags" load-path))
-(autoload 'gtags-mode "gtags" "" t)
+(add-hook 'c-mode-hook 'helm-gtags-mode)
+(add-hook 'c++-mode-hook 'helm-gtags-mode)
+(add-hook 'asm-mode-hook 'helm-gtags-mode)
 
-(add-hook 'gtags-mode-hook
-          (lambda ()
-            (local-set-key (kbd "M-*") 'gtags-pop-stack)
-            (local-set-key (kbd "M-.") 'gtags-find-tag)
-            (local-set-key (kbd "M-p") 'gtags-find-pattern)
-            (local-set-key (kbd "M-s") 'gtags-find-symbol)
-            (local-set-key (kbd "M-,") 'gtags-find-rtag)))
+(custom-set-variables
+ '(helm-gtags-path-style 'relative)
+ '(helm-gtags-ignore-case t)
+ '(helm-gtags-auto-update t)
+ '(helm-gtags-prefix-key "C-t")
+ '(helm-gtags-suggested-key-mapping t))
 
+(eval-after-load "helm-gtags"
+  '(progn
+     (define-key helm-gtags-mode-map (kbd "M-t") 'helm-gtags-find-tag)
+     (define-key helm-gtags-mode-map (kbd "M-r") 'helm-gtags-find-rtag)
+     (define-key helm-gtags-mode-map (kbd "M-s") 'helm-gtags-find-symbol)
+     (define-key helm-gtags-mode-map (kbd "M-g M-p") 'helm-gtags-parse-file)
+     (define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
+     (define-key helm-gtags-mode-map (kbd "C-c >") 'helm-gtags-next-history)
+     (define-key helm-gtags-mode-map (kbd "M-,") 'helm-gtags-pop-stack)))
 
 ;;;
 ;;; GDB-DEBUG
@@ -131,10 +173,12 @@
 
 ;;;
 ;;; GIT
+
 (require 'git)
 
 ;;;
 ;;; C++ MEMBER FUNCTION
+
 (require 'member-functions)
 
 ;;;
@@ -160,6 +204,7 @@
 
 ;;;
 ;;; MOVE FRAME
+
 (windmove-default-keybindings 'meta)
 
 ;;;
@@ -167,7 +212,6 @@
 
 (setq kill-whole-line t)
 (normal-erase-is-backspace-mode 1)
-;;(delete-selection-mode t)
 
 ;;;
 ;;; JSON MODE
@@ -179,10 +223,6 @@
 ;;; LINE WRAP
 
 (setq truncate-partial-width-windows nil)
-
-;;; AUTO SAVE
-;; (setq auto-save-interval 5
-;;       auto-save-timeout 5)
 
 ;;;
 ;;; MAC
@@ -309,6 +349,11 @@
 (add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
 
 ;;;
+;;; ROBOT MODE
+(load-file "~/.emacs.d/site-lisp/robot-mode.el")
+(setq auto-mode-alist (append '(("\.robot$" . robot-mode)) auto-mode-alist))
+
+;;;
 ;;; AUTO MODE
 
 (setq auto-mode-alist (append '(("\.outline$" . outline-mode)) auto-mode-alist))
@@ -320,6 +365,7 @@
     ))
  (t
   (progn
+    (setq auto-mode-alist (append '(("\.go$" . go-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.i$" . c++-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.l$" . c++-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.y$" . c++-mode)) auto-mode-alist))
@@ -327,6 +373,7 @@
     (setq auto-mode-alist (append '(("\.re$" . c-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.ly$" . c-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.msg$" . c-mode)) auto-mode-alist))
+    (setq auto-mode-alist (append '(("\.robot$" . robot-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.conf$" . conf-unix-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.sql$" . sql-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.sh$" . shell-script-mode)) auto-mode-alist))
@@ -334,7 +381,7 @@
     (setq auto-mode-alist (append '(("\.java$" . java-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.py$" . python-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.go$" . go-mode)) auto-mode-alist))
-    (setq auto-mode-alist (append '(("\.js$" . javascript-mode)) auto-mode-alist))
+    (setq auto-mode-alist (append '(("\.js$" . js-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.sh$" . sh-mode)) auto-mode-alist))
     ))
  )
@@ -378,37 +425,38 @@
 ;;;
 ;;; GREP
 
-;;(setq-default grep-command "grep -nrHI -e ")
-(setq grep-command "grep -nrHI --exclude='.svn' -e ")
+(setq grep-command "grep -nrHI --exclude={.git,.svn,Makefile*} --exclude=*.{am,Po,Plo,la,lo,lai,json,tag} -e ")
 (setq grep-highlight-matches t)
 
 ;;;
 ;;; WINDOW SYSTEM
 
+;;(set-default-font "NanumGothicCoding 16")
 (when window-system
-  ;;(mwheel-install)
-  (cond
-   ((string-equal "mac" window-system)
-    (progn
-     (add-to-list 'default-frame-alist '(font . "-apple-monaco-medium-r-normal--10-100-72-72-m-100-iso10646-1"))
-      (add-to-list 'default-frame-alist '(width . 120))
-      (add-to-list 'default-frame-alist '(height . 60))
-      ))
-   ((string-equal "w32" window-system)
-    (progn
-      (create-fontset-from-fontset-spec
-       "-outline-Monaco-normal-r-normal-normal-12-90-96-96-c-*-iso8859-1,korean-ksc5601:-outline-µ¸¿òÃ¼-normal-r-normal-normal-12-90-96-96-c-*-ksc5601.1987*-*")
-      (add-to-list 'default-frame-alist '(font . "-outline-Monaco-normal-r-normal-normal-12-90-96-96-c-*-iso8859-1"))
-      ))
-   )
-  )
+  (setq frame-title-format '(buffer-file-name "%f" ("%b")))
+  ;; for font list - fc-list
+  (set-face-attribute 'default nil
+                      :family "Inconsolata"
+                      :height 150
+                      :weight 'normal
+                      :width 'normal)
+
+  (when (functionp 'set-fontset-font)
+    (set-fontset-font "fontset-default"
+                      'korean-ksc5601
+                      (font-spec :family "NanumGothicCoding"
+                                 :width 'normal
+                                 :size 16
+                                 :weight 'normal))
+    ))
 
 ;;
 ;; TRAMP
 (require 'tramp)
 (setq tramp-default-method "ssh")
-;;(add-to-list tramp-default-proxy-alist ("srch14" nil "/ssh:junyoung@spb-ws2-srch14"))
-;; /sudo:srch14:path
-
+(setq tramp-chunksize 500)
+(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
 ;;;
-;;; uniq-lines()
+;;; THEME
+
+(load-theme 'cyberpunk t)
