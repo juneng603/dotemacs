@@ -12,17 +12,17 @@
 ;;; add a default load-path
 (add-to-list 'load-path "~/.emacs.d/site-lisp/")
 
-(when (memq window-system '(mac ns))
-  (exec-path-from-shell-initialize))
+;; (when (memq window-system '(mac ns))
+;;   (exec-path-from-shell-initialize))
 
-;; (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
-;; (setq exec-path (append exec-path '("/usr/local/bin")))
+(setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin"))
+(setq exec-path (append exec-path '("/usr/local/bin")))
 
 
 ;;;
 ;;; LOAD PATH
 
-;;(setenv "PATH" "~/bin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/opt/X11/bin")
+(setenv "PATH" "~/bin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/opt/X11/bin")
 
 ;;;
 ;;; NO SPLASH
@@ -42,9 +42,9 @@
 ;;;
 ;;; HELM PROJECTILE
 
-;; (projectile-global-mode)
-;; (setq projectile-completion-system 'helm)
-;; (helm-projectile-on)
+(projectile-global-mode)
+(setq projectile-completion-system 'helm)
+(helm-projectile-on)
 
 ;;;
 ;;; disable ctrl z to hide an emacs app in mac os x
@@ -133,8 +133,10 @@
 ;;; GNU GLOBAL WITH HELM
 
 (add-hook 'c-mode-hook 'helm-gtags-mode)
+(add-hook 'java-mode-hook 'helm-gtags-mode)
 (add-hook 'c++-mode-hook 'helm-gtags-mode)
 (add-hook 'asm-mode-hook 'helm-gtags-mode)
+(add-hook 'clojure-mode-hook 'inf-clojure-minor-mode)
 
 (custom-set-variables
  '(helm-gtags-path-style 'relative)
@@ -179,7 +181,7 @@
 ;;;
 ;;; C++ MEMBER FUNCTION
 
-(require 'member-functions)
+;;(require 'member-functions)
 
 ;;;
 ;;; TAB
@@ -350,8 +352,8 @@
 
 ;;;
 ;;; ROBOT MODE
-(load-file "~/.emacs.d/site-lisp/robot-mode.el")
-(setq auto-mode-alist (append '(("\.robot$" . robot-mode)) auto-mode-alist))
+;; (load-file "~/.emacs.d/site-lisp/robot-mode.el")
+;; (setq auto-mode-alist (append '(("\.robot$" . robot-mode)) auto-mode-alist))
 
 ;;;
 ;;; AUTO MODE
@@ -382,6 +384,7 @@
     (setq auto-mode-alist (append '(("\.py$" . python-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.go$" . go-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.js$" . js-mode)) auto-mode-alist))
+    (setq auto-mode-alist (append '(("\.clj$" . clojure-mode)) auto-mode-alist))
     (setq auto-mode-alist (append '(("\.sh$" . sh-mode)) auto-mode-alist))
     ))
  )
@@ -430,25 +433,7 @@
 
 ;;;
 ;;; WINDOW SYSTEM
-
-;;(set-default-font "NanumGothicCoding 16")
-(when window-system
-  (setq frame-title-format '(buffer-file-name "%f" ("%b")))
-  ;; for font list - fc-list
-  (set-face-attribute 'default nil
-                      :family "Inconsolata"
-                      :height 150
-                      :weight 'normal
-                      :width 'normal)
-
-  (when (functionp 'set-fontset-font)
-    (set-fontset-font "fontset-default"
-                      'korean-ksc5601
-                      (font-spec :family "NanumGothicCoding"
-                                 :width 'normal
-                                 :size 16
-                                 :weight 'normal))
-    ))
+(set-default-font "D2Coding 14")
 
 ;;
 ;; TRAMP
@@ -456,6 +441,7 @@
 (setq tramp-default-method "ssh")
 (setq tramp-chunksize 500)
 (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+
 ;;;
 ;;; THEME
 
